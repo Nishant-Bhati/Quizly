@@ -1,27 +1,14 @@
 import React, { useState } from "react";
-import Quiz from "./quiz/Quiz";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState(null);
-  const [isQuizStarted, setIsQuizStarted] = useState(false);
+  const navigate = useNavigate();
   const handleStartQuiz = () => {
     if (selectedDifficulty) {
-      setIsQuizStarted(true);
+      navigate("/quiz", { state: { difficulty: selectedDifficulty } });
     }
   };
-
-  const handleExitQuiz = () => {
-    setIsQuizStarted(false);
-    setSelectedDifficulty(null);
-  };
-
-  if (isQuizStarted) {
-    return (
-      <div className="min-h-screen bg-[#10002B] text-white">
-        <Quiz difficulty={selectedDifficulty} onExit={handleExitQuiz} />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#10002B] text-white flex flex-col items-center py-8 sm:py-12 px-4">
@@ -133,7 +120,8 @@ const Home = () => {
             </div>
             <h3 className="text-xl font-semibold mb-1">Easy</h3>
             <p className="text-gray-400 text-sm text-center">
-              Perfect for beginners
+              Perfect for beginners <br />
+              10 questions
             </p>
           </button>
 
@@ -158,7 +146,8 @@ const Home = () => {
             </div>
             <h3 className="text-xl font-semibold mb-1">Medium</h3>
             <p className="text-gray-400 text-sm text-center">
-              Balanced challenge
+              Balanced challenge <br />
+              15 questions
             </p>
           </button>
 
@@ -183,7 +172,8 @@ const Home = () => {
             </div>
             <h3 className="text-xl font-semibold mb-1">Hard</h3>
             <p className="text-gray-400 text-sm text-center">
-              For trivia masters
+              For trivia masters <br />
+              20 questions
             </p>
           </button>
         </div>
@@ -210,7 +200,7 @@ const Home = () => {
 
       {/* Quiz Info */}
       <p className="text-gray-400 text-sm sm:text-base">
-        10 questions • Choose difficulty • ~5 minutes
+        questions • Choose difficulty • ~5 minutes
       </p>
     </div>
   );

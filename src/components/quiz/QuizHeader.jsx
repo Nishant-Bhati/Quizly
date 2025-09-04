@@ -3,10 +3,10 @@ import React from "react";
 
 const QuizHeader = ({ difficulty, onExit }) => {
   return (
-    <div className="flex justify-between items-center mb-6">
+    <div className="flex flex-col sm:flex-row gap-3 sm:gap-0 justify-between items-stretch sm:items-center mb-6">
       <button
         onClick={onExit}
-        className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+        className="flex items-center justify-center gap-2 px-4 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors w-full sm:w-auto"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -20,7 +20,7 @@ const QuizHeader = ({ difficulty, onExit }) => {
         </svg>
         Exit Quiz
       </button>
-      <span className="px-4 py-2 bg-white/10 rounded-lg capitalize">
+      <span className="px-4 py-2 bg-white/10 rounded-lg capitalize text-center sm:text-left">
         {difficulty}
       </span>
     </div>

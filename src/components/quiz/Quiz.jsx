@@ -3,10 +3,11 @@ import QuizHeader from "./QuizHeader";
 import ProgressBar from "./ProgressBar";
 import Timer from "./Timer";
 import QuestionCard from "./QuestionCard";
-import QuizCompletion from "./QuizCompletion";
 import { shuffleArray } from "../../utils/quizUtils";
+import questionsData from "../questions.json";
+import { useLocation, useNavigate } from "react-router-dom";
 
-// Helper function to decode HTML entities
+// Helper function to decode HTML entities (kept for compatibility, though not required for local data)
 const decodeHtml = (html) => {
   const txt = document.createElement("textarea");
   txt.innerHTML = html;
@@ -14,6 +15,9 @@ const decodeHtml = (html) => {
 };
 
 const Quiz = ({ difficulty, onExit }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const resolvedDifficulty = (difficulty || location.state?.difficulty || "easy").toLowerCase();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [questions, setQuestions] = useState([]);
@@ -24,142 +28,49 @@ const Quiz = ({ difficulty, onExit }) => {
   const [showAnswer, setShowAnswer] = useState(false);
   const [usingFallback, setUsingFallback] = useState(false);
 
-  const loadQuestions = useCallback(async () => {
-    console.log("loadQuestions called with difficulty:", difficulty);
+  const loadQuestions = useCallback(() => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(
-        `https://opentdb.com/api.php?amount=10&difficulty=${difficulty.toLowerCase()}&type=multiple`
-      );
-      const data = await response.json();
-      console.log("API Response:", data);
+      // Determine number of questions by difficulty
+      const difficultyMap = {
+        easy: 10,
+        medium: 15,
+        hard: 20,
+      };
+      const count = difficultyMap[resolvedDifficulty] || 10;
 
-      if (data.results && data.results.length > 0) {
-        const formattedQuestions = data.results.map((q, index) => {
-          const options = shuffleArray([
-            decodeHtml(q.correct_answer),
-            ...q.incorrect_answers.map(decodeHtml),
-          ]);
+      // Shuffle the full dataset to avoid repetition and pick first N
+      const shuffledPool = shuffleArray(questionsData);
+      const picked = shuffledPool.slice(0, count);
 
-          return {
-            id: index + 1,
-            text: decodeHtml(q.question),
-            correct_answer: decodeHtml(q.correct_answer),
-            options: options,
-            category: q.category,
-            difficulty: q.difficulty,
-            // Store the index of the correct answer in the shuffled array
-            correctAnswer: options.indexOf(decodeHtml(q.correct_answer)),
-          };
-        });
-
-        console.log("Setting API questions:", formattedQuestions.length);
-        setQuestions(formattedQuestions);
-        setUsingFallback(false);
-      } else {
-        throw new Error("No questions received from API");
+      if (!picked.length) {
+        throw new Error("No questions available in local dataset.");
       }
-    } catch (error) {
-      console.error("Error loading questions:", error);
-      console.log("Using fallback questions due to API error");
-      // Use fallback questions instead of showing error
-      setUsingFallback(true);
-      setError(null);
-      const fallbackQuestions = [
-        {
-          id: 1,
+
+      // Format questions to internal structure and shuffle options per question
+      const formattedQuestions = picked.map((q, index) => {
+        const options = shuffleArray([q.A, q.B, q.C, q.D]);
+        const correctText = q[q.answer]; // e.g., q['A'] => correct answer text
+        return {
+          id: index + 1,
+          text: q.question,
+          options,
           category: "General Knowledge",
-          text: "What is the capital of France?",
-          options: ["London", "Berlin", "Paris", "Madrid"],
-          correctAnswer: 2,
-        },
-        {
-          id: 2,
-          category: "Science",
-          text: "What is the chemical symbol for water?",
-          options: ["H2O", "CO2", "NaCl", "O2"],
-          correctAnswer: 0,
-        },
-        {
-          id: 3,
-          category: "History",
-          text: "Who painted the Mona Lisa?",
-          options: [
-            "Vincent van Gogh",
-            "Pablo Picasso",
-            "Leonardo da Vinci",
-            "Michelangelo",
-          ],
-          correctAnswer: 2,
-        },
-        {
-          id: 4,
-          category: "Geography",
-          text: "Which is the largest ocean on Earth?",
-          options: ["Atlantic", "Indian", "Arctic", "Pacific"],
-          correctAnswer: 3,
-        },
-        {
-          id: 5,
-          category: "Sports",
-          text: "How many players are on a basketball team?",
-          options: ["4", "5", "6", "7"],
-          correctAnswer: 1,
-        },
-        {
-          id: 6,
-          category: "Technology",
-          text: "What does CPU stand for?",
-          options: [
-            "Central Processing Unit",
-            "Computer Personal Unit",
-            "Central Program Unit",
-            "Computer Processing Unit",
-          ],
-          correctAnswer: 0,
-        },
-        {
-          id: 7,
-          category: "Literature",
-          text: "Who wrote 'Romeo and Juliet'?",
-          options: [
-            "Charles Dickens",
-            "William Shakespeare",
-            "Mark Twain",
-            "Jane Austen",
-          ],
-          correctAnswer: 1,
-        },
-        {
-          id: 8,
-          category: "Mathematics",
-          text: "What is 15 × 4?",
-          options: ["50", "60", "70", "80"],
-          correctAnswer: 1,
-        },
-        {
-          id: 9,
-          category: "Biology",
-          text: "What is the powerhouse of the cell?",
-          options: ["Nucleus", "Mitochondria", "Ribosome", "Cell membrane"],
-          correctAnswer: 1,
-        },
-        {
-          id: 10,
-          category: "Entertainment",
-          text: "Which planet is known as the Red Planet?",
-          options: ["Venus", "Mars", "Jupiter", "Saturn"],
-          correctAnswer: 1,
-        },
-      ];
-      console.log("Setting fallback questions:", fallbackQuestions.length);
-      setQuestions(fallbackQuestions);
+          difficulty: resolvedDifficulty,
+          correctAnswer: options.indexOf(correctText),
+        };
+      });
+
+      setQuestions(formattedQuestions);
+      setUsingFallback(false);
+    } catch (e) {
+      setError("Failed to load local questions.");
     } finally {
       setIsLoading(false);
     }
-  }, [difficulty]);
+  }, [resolvedDifficulty]);
 
   useEffect(() => {
     loadQuestions();
@@ -174,9 +85,17 @@ const Quiz = ({ difficulty, onExit }) => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion((prev) => prev + 1);
     } else {
-      // Time's up on last question, finish quiz
-      calculateScore();
+      // Time's up on last question, finish quiz and navigate
+      const finalScore = calculateScore();
       setIsQuizCompleted(true);
+      navigate("/results", {
+        state: {
+          score: finalScore,
+          totalQuestions: questions.length,
+          difficulty: resolvedDifficulty,
+        },
+        replace: true,
+      });
     }
   };
 
@@ -194,8 +113,16 @@ const Quiz = ({ difficulty, onExit }) => {
         setShowAnswer(false);
       } else {
         // Last question, finish quiz
-        calculateScore();
+        const finalScore = calculateScore();
         setIsQuizCompleted(true);
+        navigate("/results", {
+          state: {
+            score: finalScore,
+            totalQuestions: questions.length,
+            difficulty: resolvedDifficulty,
+          },
+          replace: true,
+        });
       }
     }, 2000);
   };
@@ -208,16 +135,30 @@ const Quiz = ({ difficulty, onExit }) => {
       }
     });
     setScore(correctAnswers);
+    return correctAnswers;
   };
 
   const handleNext = () => {
+    // Prevent progressing without a selection
+    if (answers[currentQuestion] === undefined) {
+      return;
+    }
+
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion((prev) => prev + 1);
       setShowAnswer(false);
     } else {
       // Last question, finish quiz
-      calculateScore();
+      const finalScore = calculateScore();
       setIsQuizCompleted(true);
+      navigate("/results", {
+        state: {
+          score: finalScore,
+          totalQuestions: questions.length,
+          difficulty: resolvedDifficulty,
+        },
+        replace: true,
+      });
     }
   };
 
@@ -230,11 +171,9 @@ const Quiz = ({ difficulty, onExit }) => {
 
   if (isLoading) {
     return (
-      <div className="max-w-3xl mx-auto p-4 sm:p-6 flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading questions...</p>
-        </div>
+      <div className="max-w-3xl mx-auto p-4 sm:p-6">
+        <QuizHeader difficulty={resolvedDifficulty} onExit={() => navigate('/')} />
+        <div className="text-center">Loading questions...</div>
       </div>
     );
   }
@@ -249,24 +188,9 @@ const Quiz = ({ difficulty, onExit }) => {
   );
   if (error) {
     return (
-      <div className="max-w-3xl mx-auto p-4 sm:p-6 flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-red-500 mb-4">{error}</p>
-          <div className="space-x-4">
-            <button
-              onClick={loadQuestions}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
-            >
-              Retry
-            </button>
-            <button
-              onClick={onExit}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg"
-            >
-              Return to Home
-            </button>
-          </div>
-        </div>
+      <div className="max-w-3xl mx-auto p-4 sm:p-6">
+        <QuizHeader difficulty={resolvedDifficulty} onExit={() => navigate('/')} />
+        <div className="text-center text-red-400">{error}</div>
       </div>
     );
   }
@@ -275,27 +199,12 @@ const Quiz = ({ difficulty, onExit }) => {
     return null;
   }
 
-  // Quiz completion screen
-  if (isQuizCompleted) {
-    return (
-      <QuizCompletion
-        score={score}
-        totalQuestions={questions.length}
-        onRestart={() => {
-          setCurrentQuestion(0);
-          setAnswers({});
-          setScore(0);
-          setIsQuizCompleted(false);
-          setShowAnswer(false);
-        }}
-        onGoHome={onExit}
-      />
-    );
-  }
+  // Determine if current question has a selected answer
+  const hasSelected = answers[currentQuestion] !== undefined;
 
   return (
     <div className="max-w-3xl mx-auto p-4 sm:p-6">
-      <QuizHeader difficulty={difficulty} onExit={onExit} />
+      <QuizHeader difficulty={resolvedDifficulty} onExit={() => navigate('/')} />
 
       {usingFallback && (
         <div className="mb-4 p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
@@ -321,11 +230,11 @@ const Quiz = ({ difficulty, onExit }) => {
         showCorrectAnswer={showAnswer}
       />
 
-      <div className="flex justify-between">
+      <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0">
         <button
           onClick={handlePrevious}
           disabled={currentQuestion < 1}
-          className={`px-6 py-2 rounded-lg flex items-center gap-2
+          className={`px-6 py-2 rounded-lg flex items-center gap-2 w-full sm:w-auto
             ${
               currentQuestion < 1
                 ? "bg-white/10 text-gray-500 cursor-not-allowed"
@@ -337,7 +246,13 @@ const Quiz = ({ difficulty, onExit }) => {
 
         <button
           onClick={handleNext}
-          className={`px-6 py-2 rounded-lg flex items-center gap-2 bg-purple-600 hover:bg-purple-700`}
+          disabled={!hasSelected}
+          className={`px-6 py-2 rounded-lg flex items-center gap-2 w-full sm:w-auto
+            ${
+              !hasSelected
+                ? "bg-purple-600/50 text-white/80 cursor-not-allowed"
+                : "bg-purple-600 hover:bg-purple-700"
+            }`}
         >
           {currentQuestion === questions.length - 1 ? "Finish" : "Next"}
         </button>
