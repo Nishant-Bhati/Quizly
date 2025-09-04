@@ -1,6 +1,29 @@
-import React from "react";
+import React, { useState } from "react";
+import Quiz from "./quiz/Quiz"; 
+
 
 const Home = () => {
+  const [selectedDifficulty, setSelectedDifficulty] = useState(null);
+  const [isQuizStarted, setIsQuizStarted] = useState(false);
+  const handleStartQuiz = () => {
+    if (selectedDifficulty) {
+      setIsQuizStarted(true);
+    }
+  };
+
+  const handleExitQuiz = () => {
+    setIsQuizStarted(false);
+    setSelectedDifficulty(null);
+  };
+
+  if (isQuizStarted) {
+    return (
+      <div className="min-h-screen bg-[#10002B] text-white">
+        <Quiz difficulty={selectedDifficulty} onExit={handleExitQuiz} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#10002B] text-white flex flex-col items-center py-8 sm:py-12 px-4">
       {/* Trophy Icon and Title */}
@@ -80,8 +103,100 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Difficulty Selection */}
+      <div className="w-full max-w-4xl mb-8">
+        <h2 className="text-2xl font-semibold text-center mb-3">
+          Choose Your Challenge
+        </h2>
+        <p className="text-gray-400 text-center mb-6">
+          Select a difficulty level that matches your expertise
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 px-4">
+          {/* Easy */}
+          <button
+            onClick={() => setSelectedDifficulty("easy")}
+            className={`p-6 rounded-xl flex flex-col items-center bg-green-50/5 border-2 ${
+              selectedDifficulty === "easy"
+                ? "border-green-500"
+                : "border-transparent"
+            } hover:border-green-500/50 transition-all duration-200`}
+          >
+            <div className="bg-green-500 rounded-xl p-3 mb-3">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold mb-1">Easy</h3>
+            <p className="text-gray-400 text-sm text-center">
+              Perfect for beginners
+            </p>
+          </button>
+
+          {/* Medium */}
+          <button
+            onClick={() => setSelectedDifficulty("medium")}
+            className={`p-6 rounded-xl flex flex-col items-center bg-blue-50/5 border-2 ${
+              selectedDifficulty === "medium"
+                ? "border-blue-500"
+                : "border-transparent"
+            } hover:border-blue-500/50 transition-all duration-200`}
+          >
+            <div className="bg-blue-500 rounded-xl p-3 mb-3">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-7v4h2v-4h3l-4-4-4 4h3z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold mb-1">Medium</h3>
+            <p className="text-gray-400 text-sm text-center">
+              Balanced challenge
+            </p>
+          </button>
+
+          {/* Hard */}
+          <button
+            onClick={() => setSelectedDifficulty("hard")}
+            className={`p-6 rounded-xl flex flex-col items-center bg-purple-50/5 border-2 ${
+              selectedDifficulty === "hard"
+                ? "border-purple-500"
+                : "border-transparent"
+            } hover:border-purple-500/50 transition-all duration-200`}
+          >
+            <div className="bg-purple-500 rounded-xl p-3 mb-3">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm1-13h-2v6h-2l3 3 3-3h-2z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold mb-1">Hard</h3>
+            <p className="text-gray-400 text-sm text-center">
+              For trivia masters
+            </p>
+          </button>
+        </div>
+      </div>
+
       {/* Start Quiz Button */}
-      <button className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-full flex items-center gap-2 mb-4 sm:mb-6 text-base sm:text-lg transform hover:scale-105 transition-transform duration-200">
+      <button
+        className={`bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-full flex items-center gap-2 mb-4 sm:mb-6 text-base sm:text-lg transform hover:scale-105 transition-transform duration-200 ${
+          !selectedDifficulty ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+        disabled={!selectedDifficulty}
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-5 w-5 sm:h-6 sm:w-6"
@@ -95,7 +210,7 @@ const Home = () => {
 
       {/* Quiz Info */}
       <p className="text-gray-400 text-sm sm:text-base">
-        10 questions • Mixed difficulty • ~5 minutes
+        10 questions • Choose difficulty • ~5 minutes
       </p>
     </div>
   );
