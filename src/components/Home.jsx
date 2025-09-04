@@ -2,12 +2,12 @@ import React from "react";
 
 const Home = () => {
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center py-12 px-4">
+    <div className="min-h-screen bg-[#10002B] text-white flex flex-col items-center py-8 sm:py-12 px-4">
       {/* Trophy Icon and Title */}
-      <div className="bg-purple-600 rounded-full p-4 mb-6">
+      <div className="bg-purple-600 rounded-full p-3 sm:p-4 mb-4 sm:mb-6">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-12 w-12"
+          className="h-8 w-8 sm:h-12 sm:w-12"
           viewBox="0 0 24 24"
           fill="currentColor"
         >
@@ -16,15 +16,17 @@ const Home = () => {
       </div>
 
       {/* Title */}
-      <h1 className="text-6xl font-bold text-purple-600 mb-4">QuizMaster</h1>
+      <h1 className="text-4xl sm:text-6xl font-bold text-purple-600 mb-3 sm:mb-4">
+        Quizly
+      </h1>
 
       {/* Subtitle */}
-      <p className="text-gray-400 text-xl text-center max-w-2xl mb-12">
+      <p className="text-gray-400 text-lg sm:text-xl text-center max-w-2xl mb-8 sm:mb-12 px-2">
         Test your knowledge with challenging questions from around the world
       </p>
 
       {/* Features Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl mb-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 w-full max-w-5xl mb-8 sm:mb-12 px-2 sm:px-4">
         {/* Multiple Choice */}
         <div className="bg-gray-900 rounded-lg p-8 flex flex-col items-center text-center">
           <div className="bg-purple-900 rounded-full p-4 mb-4">
@@ -79,10 +81,10 @@ const Home = () => {
       </div>
 
       {/* Start Quiz Button */}
-      <button className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-8 rounded-full flex items-center gap-2 mb-6">
+      <button className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-full flex items-center gap-2 mb-4 sm:mb-6 text-base sm:text-lg transform hover:scale-105 transition-transform duration-200">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6"
+          className="h-5 w-5 sm:h-6 sm:w-6"
           viewBox="0 0 24 24"
           fill="currentColor"
         >
@@ -92,7 +94,7 @@ const Home = () => {
       </button>
 
       {/* Quiz Info */}
-      <p className="text-gray-400">
+      <p className="text-gray-400 text-sm sm:text-base">
         10 questions • Mixed difficulty • ~5 minutes
       </p>
     </div>
