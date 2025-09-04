@@ -14,10 +14,20 @@ const decodeHtml = (html) => {
   return txt.value;
 };
 
+// Quiz screen: orchestrates the entire quiz lifecycle
+// - Loads and formats questions based on difficulty
+// - Tracks user selections and progress
+// - Handles timing, auto-advance, and completion
+// - Navigates to /results with score and detailed summary
 const Quiz = ({ difficulty, onExit }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const resolvedDifficulty = (difficulty || location.state?.difficulty || "easy").toLowerCase();
+  // Determine difficulty from (prop → route state → default)
+  const resolvedDifficulty = (
+    difficulty ||
+    location.state?.difficulty ||
+    "easy"
+  ).toLowerCase();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [questions, setQuestions] = useState([]);
@@ -28,6 +38,7 @@ const Quiz = ({ difficulty, onExit }) => {
   const [showAnswer, setShowAnswer] = useState(false);
   const [usingFallback, setUsingFallback] = useState(false);
 
+  // Prepare question set based on resolved difficulty
   const loadQuestions = useCallback(() => {
     setIsLoading(true);
     setError(null);
@@ -72,6 +83,7 @@ const Quiz = ({ difficulty, onExit }) => {
     }
   }, [resolvedDifficulty]);
 
+  // Load questions on mount or when difficulty changes
   useEffect(() => {
     loadQuestions();
   }, [loadQuestions]);
@@ -81,6 +93,7 @@ const Quiz = ({ difficulty, onExit }) => {
     setShowAnswer(false);
   }, [currentQuestion]);
 
+  // Timebox behavior: advance or finish when time runs out
   const handleTimeUp = () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion((prev) => prev + 1);
@@ -93,12 +106,14 @@ const Quiz = ({ difficulty, onExit }) => {
           score: finalScore,
           totalQuestions: questions.length,
           difficulty: resolvedDifficulty,
+          summary: buildSummary(),
         },
         replace: true,
       });
     }
   };
 
+  // Record user selection and briefly reveal correctness before auto-advancing
   const handleSelectAnswer = (answerIndex) => {
     setAnswers((prev) => ({
       ...prev,
@@ -120,6 +135,7 @@ const Quiz = ({ difficulty, onExit }) => {
             score: finalScore,
             totalQuestions: questions.length,
             difficulty: resolvedDifficulty,
+            summary: buildSummary(),
           },
           replace: true,
         });
@@ -127,6 +143,7 @@ const Quiz = ({ difficulty, onExit }) => {
     }, 2000);
   };
 
+  // Compute the total number of correct answers
   const calculateScore = () => {
     let correctAnswers = 0;
     questions.forEach((question, index) => {
@@ -138,6 +155,19 @@ const Quiz = ({ difficulty, onExit }) => {
     return correctAnswers;
   };
 
+  // Build a detailed per-question summary to show on the results page
+  const buildSummary = () => {
+    return questions.map((q, idx) => ({
+      id: q.id,
+      question: q.text,
+      options: q.options,
+      selectedIndex: answers[idx],
+      correctIndex: q.correctAnswer,
+      isCorrect: answers[idx] === q.correctAnswer,
+    }));
+  };
+
+  // Move forward if an answer is selected; finish on the final question
   const handleNext = () => {
     // Prevent progressing without a selection
     if (answers[currentQuestion] === undefined) {
@@ -156,12 +186,14 @@ const Quiz = ({ difficulty, onExit }) => {
           score: finalScore,
           totalQuestions: questions.length,
           difficulty: resolvedDifficulty,
+          summary: buildSummary(),
         },
         replace: true,
       });
     }
   };
 
+  // Allow going back to review or change an earlier selection
   const handlePrevious = () => {
     if (currentQuestion > 0) {
       setCurrentQuestion((prev) => prev - 1);
@@ -169,10 +201,14 @@ const Quiz = ({ difficulty, onExit }) => {
     }
   };
 
+  // Loading state
   if (isLoading) {
     return (
       <div className="max-w-3xl mx-auto p-4 sm:p-6">
-        <QuizHeader difficulty={resolvedDifficulty} onExit={() => navigate('/')} />
+        <QuizHeader
+          difficulty={resolvedDifficulty}
+          onExit={() => navigate("/")}
+        />
         <div className="text-center">Loading questions...</div>
       </div>
     );
@@ -186,10 +222,14 @@ const Quiz = ({ difficulty, onExit }) => {
     "usingFallback:",
     usingFallback
   );
+  // Error state
   if (error) {
     return (
       <div className="max-w-3xl mx-auto p-4 sm:p-6">
-        <QuizHeader difficulty={resolvedDifficulty} onExit={() => navigate('/')} />
+        <QuizHeader
+          difficulty={resolvedDifficulty}
+          onExit={() => navigate("/")}
+        />
         <div className="text-center text-red-400">{error}</div>
       </div>
     );
@@ -202,9 +242,13 @@ const Quiz = ({ difficulty, onExit }) => {
   // Determine if current question has a selected answer
   const hasSelected = answers[currentQuestion] !== undefined;
 
+  // Main quiz layout
   return (
     <div className="max-w-3xl mx-auto p-4 sm:p-6">
-      <QuizHeader difficulty={resolvedDifficulty} onExit={() => navigate('/')} />
+      <QuizHeader
+        difficulty={resolvedDifficulty}
+        onExit={() => navigate("/")}
+      />
 
       {usingFallback && (
         <div className="mb-4 p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">

@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+// Landing screen: pick difficulty and start the quiz
 const Home = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState(null);
   const navigate = useNavigate();
+  // Start quiz by navigating to /quiz and passing the chosen difficulty via route state
   const handleStartQuiz = () => {
     if (selectedDifficulty) {
       navigate("/quiz", { state: { difficulty: selectedDifficulty } });

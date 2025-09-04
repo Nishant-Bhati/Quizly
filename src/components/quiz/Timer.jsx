@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 
+// Per-question countdown timer
+// - Resets when questionIndex changes
+// - Calls onTimeUp() when it reaches 0
 const Timer = ({ duration, onTimeUp, questionIndex }) => {
   const [timeLeft, setTimeLeft] = useState(duration);
 
@@ -8,6 +11,7 @@ const Timer = ({ duration, onTimeUp, questionIndex }) => {
     setTimeLeft(duration);
   }, [duration, questionIndex]);
 
+  // Tick down every second; stop and fire onTimeUp when reaching 0
   useEffect(() => {
     if (timeLeft <= 0) {
       onTimeUp();

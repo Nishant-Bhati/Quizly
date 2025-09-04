@@ -1,5 +1,10 @@
 import React from "react";
 
+// Presentational component for a single question and its answer options
+// Responsibilities:
+// - Renders question text and options
+// - Highlights selected and correct answers based on props
+// - Calls onSelectAnswer when an option is clicked (unless showCorrectAnswer is true)
 const QuestionCard = ({
   question,
   selectedAnswer,
@@ -8,12 +13,14 @@ const QuestionCard = ({
 }) => {
   const options = ["A", "B", "C", "D"];
 
+  // Decode HTML entities if present in question/options strings
   const decodeHTML = (html) => {
     const txt = document.createElement("textarea");
     txt.innerHTML = html;
     return txt.value;
   };
 
+  // Determine Tailwind classes for each option button based on state
   const getButtonClass = (index) => {
     if (showCorrectAnswer) {
       if (index === question.correctAnswer) {

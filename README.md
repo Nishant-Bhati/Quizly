@@ -143,9 +143,6 @@ Edge Cases → Handles empty/short data with user-friendly fallback.
 
 ♿ Accessibility improvements (ARIA roles, focus states)
 
-🎯 Demo
-
-🔗 [Add GitHub Pages / Netlify / Vercel link here if deployed]
 
 💡 Final Note
 
