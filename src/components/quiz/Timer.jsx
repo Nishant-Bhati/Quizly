@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
 
-const Timer = ({ duration, onTimeUp }) => {
+const Timer = ({ duration, onTimeUp, questionIndex }) => {
   const [timeLeft, setTimeLeft] = useState(duration);
+
+  // Reset timer when question changes
+  useEffect(() => {
+    setTimeLeft(duration);
+  }, [duration, questionIndex]);
 
   useEffect(() => {
     if (timeLeft <= 0) {

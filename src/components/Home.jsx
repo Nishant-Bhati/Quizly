@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import Quiz from "./quiz/Quiz"; 
-
+import Quiz from "./quiz/Quiz";
 
 const Home = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState(null);
@@ -192,6 +191,7 @@ const Home = () => {
 
       {/* Start Quiz Button */}
       <button
+        onClick={handleStartQuiz}
         className={`bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-full flex items-center gap-2 mb-4 sm:mb-6 text-base sm:text-lg transform hover:scale-105 transition-transform duration-200 ${
           !selectedDifficulty ? "opacity-50 cursor-not-allowed" : ""
         }`}
